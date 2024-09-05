@@ -1,5 +1,7 @@
 package db;
 
+import exceptions.DatabaseConnectionException;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -22,10 +24,8 @@ public class DbConnection {
             System.out.println("PostgreSQL JDBC Driver not found.");
             e.printStackTrace();
         } catch (SQLException e) {
-            System.out.println("Connection to PostgreSQL database failed.");
-            e.printStackTrace();
-        }
-        return connection;
+        throw new DatabaseConnectionException("Connection to PostgreSQL database failed.", e);
+    }return connection;
     }
 
 }
