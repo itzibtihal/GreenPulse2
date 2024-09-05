@@ -25,7 +25,8 @@ public class DbConnection {
             e.printStackTrace();
         } catch (SQLException e) {
         throw new DatabaseConnectionException("Connection to PostgreSQL database failed.", e);
-    }return connection;
+    }
+        return connection;
     }
 
 }
