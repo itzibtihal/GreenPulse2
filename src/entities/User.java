@@ -1,6 +1,8 @@
 package entities;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class User {
@@ -9,15 +11,18 @@ public class User {
     private String name;
     private int age;
     private LocalDateTime dateOfCreation;
-
+    private List<Consumption> consumption;
 
     public User(String name, int age) {
         this.id = UUID.randomUUID();
         this.name = name;
         this.age = age;
         this.dateOfCreation = LocalDateTime.now();
+        this.consumption = new ArrayList<>();
     }
 
+    public User() {
+    }
 
     public UUID getId() {
         return id;
@@ -35,6 +40,21 @@ public class User {
         return dateOfCreation;
     }
 
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public List<Consumption> getConsumption() {
+        return consumption;
+    }
+
+    public void setConsumption(List<Consumption> consumption) {
+        this.consumption = consumption;
+    }
+
+    public void setDateOfCreation(LocalDateTime dateOfCreation) {
+        this.dateOfCreation = dateOfCreation;
+    }
 
     public void setName(String name) {
         this.name = name;
@@ -46,6 +66,7 @@ public class User {
 
     @Override
     public String toString() {
-        return "User [id=" + id + ", name=" + name + ", age=" + age + ", dateOfCreation=" + dateOfCreation + "]";
+        return "User [id=" + id + ", name=" + name + ", age=" + age + ", dateOfCreation=" + dateOfCreation +
+                ", consommations=" + consumption + "]";
     }
 }
