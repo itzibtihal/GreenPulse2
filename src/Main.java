@@ -18,7 +18,7 @@ public class Main {
                 System.out.println("Driver: " + metaData.getDriverName() + " " + metaData.getDriverVersion());
 
                 if (connection.isValid(2)) {
-                    System.out.println("The connection is valid.");
+                    System.out.println("The connection is valid .");
                 } else {
                     System.out.println("The connection is not valid.");
                 }
