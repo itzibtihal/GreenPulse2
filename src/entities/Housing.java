@@ -1,7 +1,6 @@
 package entities;
 
 import entities.enums.EnergyType;
-
 import java.time.LocalDate;
 
 public class Housing extends Consumption {
@@ -30,7 +29,8 @@ public class Housing extends Consumption {
         this.energyType = energyType;
     }
 
-    public double calculateImpact() {
+    @Override
+    public double calculerImpact() {
         return energyConsumption * energyType.getCarbonImpact();
     }
 
@@ -38,7 +38,6 @@ public class Housing extends Consumption {
     public String toString() {
         return super.toString() +
                 "\nEnergy Type: " + energyType +
-                "\nEnergy Consumption: " + energyConsumption +
-                "\nCarbon Impact: " + calculateImpact();
+                "\nEnergy Consumption: " + energyConsumption;
     }
 }

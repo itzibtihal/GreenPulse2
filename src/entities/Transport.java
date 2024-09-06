@@ -35,6 +35,11 @@ public class Transport extends Consumption {
     }
 
     @Override
+    public double calculerImpact() {
+        return distanceTraveled * vehicleType.getCarbonImpact();
+    }
+
+    @Override
     public String toString() {
         return super.toString() +
                 "\nVehicle Type: " + vehicleType +

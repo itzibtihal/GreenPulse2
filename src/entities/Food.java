@@ -1,8 +1,6 @@
 package entities;
 
-
 import entities.enums.FoodType;
-
 import java.time.LocalDate;
 
 public class Food extends Consumption {
@@ -31,7 +29,10 @@ public class Food extends Consumption {
         this.foodType = foodType;
     }
 
-    public double calculateImpact() {
+
+
+    @Override
+    public double calculerImpact() {
         return weight * foodType.getCarbonImpact();
     }
 
@@ -39,8 +40,6 @@ public class Food extends Consumption {
     public String toString() {
         return super.toString() +
                 "\nFood Type: " + foodType +
-                "\nWeight: " + weight +
-                "\nCarbon Impact: " + calculateImpact();
+                "\nWeight: " + weight ;
     }
-
 }
