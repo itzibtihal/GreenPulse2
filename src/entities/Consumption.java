@@ -3,20 +3,23 @@ package entities;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 
-public class Consumption {
+public abstract class Consumption {
     private LocalDate startDate;
     private LocalDate endDate;
     private double amount;
 
+    // Constructeur avec paramètres
     public Consumption(LocalDate startDate, LocalDate endDate, double amount) {
         this.startDate = startDate;
         this.endDate = endDate;
         this.amount = amount;
     }
 
+    // Constructeur par défaut
     public Consumption() {
     }
 
+    // Getters et setters
     public LocalDate getStartDate() {
         return startDate;
     }
@@ -41,19 +44,22 @@ public class Consumption {
         this.amount = amount;
     }
 
-
-    // calculate duration
+    // Méthode pour calculer la durée en jours
     public long getDurationInDays() {
         return ChronoUnit.DAYS.between(startDate, endDate);
     }
 
+    // Méthode abstraite que les sous-classes doivent implémenter
+    public abstract double calculerImpact();
 
+    // Méthode toString
     @Override
     public String toString() {
         return "CarbonConsumption : \n" +
                 "\nstartDate=" + startDate +
                 "\nendDate=" + endDate +
                 "\namount=" + amount +
-                "\nduration=" + getDurationInDays() + " days" ;
+                "\nduration=" + getDurationInDays() + " days" +
+                "\nimpact=" + calculerImpact(); // Inclut l'impact calculé
     }
 }
