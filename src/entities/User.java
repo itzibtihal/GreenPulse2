@@ -13,6 +13,14 @@ public class User {
     private LocalDateTime dateOfCreation;
     private List<Consumption> consumption;
 
+    public User(UUID id, String name, int age, LocalDateTime dateOfCreation) {
+        this.id = id;
+        this.name = name;
+        this.age = age;
+        this.dateOfCreation = dateOfCreation;
+        this.consumption = new ArrayList<>();
+    }
+
     public User(String name, int age) {
         this.id = UUID.randomUUID();
         this.name = name;
@@ -23,7 +31,6 @@ public class User {
 
     public User() {
     }
-
     public UUID getId() {
         return id;
     }
