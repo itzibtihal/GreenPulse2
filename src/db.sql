@@ -1,4 +1,6 @@
 
+
+
 -- 1. Create enum types
 CREATE TYPE consumption_type AS ENUM ('TRANSPORT', 'LOGEMENT', 'ALIMENTATION');
 CREATE TYPE vehicule_type AS ENUM ('voiture', 'train');
@@ -54,3 +56,6 @@ VALUES
     (uuid_generate_v4(), 'Alice', 30, NOW()),
     (uuid_generate_v4(), 'Bob', 25, NOW()),
     (uuid_generate_v4(), 'Charlie', 40, NOW());
+
+
+
