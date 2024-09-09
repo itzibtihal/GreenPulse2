@@ -1,18 +1,26 @@
 package entities;
 
 import entities.enums.EnergyType;
+
 import java.time.LocalDate;
+import java.util.UUID;
 
 public class Housing extends Consumption {
     private double energyConsumption;
     private EnergyType energyType;
 
-    public Housing(LocalDate startDate, LocalDate endDate, double amount, double energyConsumption, EnergyType energyType) {
-        super(startDate, endDate, amount);
+    // Constructor with parameters
+    public Housing(UUID id, UUID userId, LocalDate startDate, LocalDate endDate, double amount, double energyConsumption, EnergyType energyType) {
+        super(id, userId, startDate, endDate, amount, ConsumptionType.HOUSING); // Pass HOUSING type
         this.energyConsumption = energyConsumption;
         this.energyType = energyType;
     }
 
+    // Default constructor
+    public Housing() {
+    }
+
+    // Getters and setters
     public double getEnergyConsumption() {
         return energyConsumption;
     }
@@ -30,14 +38,15 @@ public class Housing extends Consumption {
     }
 
     @Override
-    public double calculerImpact() {
-        return energyConsumption * energyType.getCarbonImpact();
+    public double calculateImpact() {
+        return energyConsumption * energyType.getCarbonImpact(); // Use the EnergyType impact for calculation
     }
 
     @Override
     public String toString() {
-        return super.toString() +
-                "\nEnergy Type: " + energyType +
-                "\nEnergy Consumption: " + energyConsumption;
+        return "Housing {" +
+                "energyConsumption=" + energyConsumption +
+                ", energyType=" + energyType +
+                "} " + super.toString();
     }
 }

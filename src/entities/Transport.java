@@ -3,17 +3,24 @@ package entities;
 import entities.enums.VehicleType;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 public class Transport extends Consumption {
     private double distanceTraveled;
     private VehicleType vehicleType;
 
-    public Transport(LocalDate startDate, LocalDate endDate, double amount, double distanceTraveled, VehicleType vehicleType) {
-        super(startDate, endDate, amount);
+    // Constructor with parameters
+    public Transport(UUID id, UUID userId, LocalDate startDate, LocalDate endDate, double amount, double distanceTraveled, VehicleType vehicleType) {
+        super(id, userId, startDate, endDate, amount, ConsumptionType.TRANSPORT); // Pass TRANSPORT type
         this.distanceTraveled = distanceTraveled;
         this.vehicleType = vehicleType;
     }
 
+    // Default constructor
+    public Transport() {
+    }
+
+    // Getters and setters
     public double getDistanceTraveled() {
         return distanceTraveled;
     }
@@ -30,20 +37,16 @@ public class Transport extends Consumption {
         this.vehicleType = vehicleType;
     }
 
-    public double calculateImpact() {
-        return distanceTraveled * vehicleType.getCarbonImpact();
-    }
-
     @Override
-    public double calculerImpact() {
-        return distanceTraveled * vehicleType.getCarbonImpact();
+    public double calculateImpact() {
+        return distanceTraveled * vehicleType.getCarbonImpact(); // Use the VehicleType impact for calculation
     }
 
     @Override
     public String toString() {
-        return super.toString() +
-                "\nVehicle Type: " + vehicleType +
-                "\nDistance Traveled: " + distanceTraveled +
-                "\nCarbon Impact: " + calculateImpact();
+        return "Transport {" +
+                "distanceTraveled=" + distanceTraveled +
+                ", vehicleType=" + vehicleType +
+                "} " + super.toString();
     }
 }

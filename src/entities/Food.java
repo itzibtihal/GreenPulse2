@@ -1,18 +1,26 @@
 package entities;
 
 import entities.enums.FoodType;
+
 import java.time.LocalDate;
+import java.util.UUID;
 
 public class Food extends Consumption {
     private double weight;
     private FoodType foodType;
 
-    public Food(LocalDate startDate, LocalDate endDate, double amount, double weight, FoodType foodType) {
-        super(startDate, endDate, amount);
+    // Constructor with parameters
+    public Food(UUID id, UUID userId, LocalDate startDate, LocalDate endDate, double amount, double weight, FoodType foodType) {
+        super(id, userId, startDate, endDate, amount, ConsumptionType.FOOD); // Pass FOOD type
         this.weight = weight;
         this.foodType = foodType;
     }
 
+    // Default constructor
+    public Food() {
+    }
+
+    // Getters and setters
     public double getWeight() {
         return weight;
     }
@@ -29,17 +37,16 @@ public class Food extends Consumption {
         this.foodType = foodType;
     }
 
-
-
     @Override
-    public double calculerImpact() {
-        return weight * foodType.getCarbonImpact();
+    public double calculateImpact() {
+        return weight * foodType.getCarbonImpact(); // Use the FoodType impact for calculation
     }
 
     @Override
     public String toString() {
-        return super.toString() +
-                "\nFood Type: " + foodType +
-                "\nWeight: " + weight ;
+        return "Food {" +
+                "weight=" + weight +
+                ", foodType=" + foodType +
+                "} " + super.toString();
     }
 }
