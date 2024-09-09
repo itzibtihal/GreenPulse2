@@ -113,7 +113,7 @@ public class Main {
 //        }
 
 
-        fetchAndDisplayConsumptions(userRepository);
+
 
 
 
@@ -122,35 +122,5 @@ public class Main {
     }
 
 
-    public static void fetchAndDisplayConsumptions(UserRepository userRepository) {
-        UUID userId = UUID.fromString("80ceeb7c-4704-4e3a-bcc3-a6b93fbb08ba"); // Example user ID
 
-
-
-        // Retrieve the user from the repository
-        Optional<User> optionalUser = userRepository.findById(userId);
-        if (optionalUser.isPresent()) {
-            User user = optionalUser.get();
-            List<Consumption> consumptions = userRepository.findConsumptionsByUserId(userId);
-
-            for (Consumption consumption : consumptions) {
-                String type = getConsumptionType(consumption);
-                System.out.println("Consumption Type: " + type);
-                System.out.println("Details: " + consumption);
-            }
-        } else {
-            System.out.println("User not found.");
-        }
-    }
-
-    private static String getConsumptionType(Consumption consumption) {
-        if (consumption instanceof Food) {
-            return "ALIMENTATION";
-        } else if (consumption instanceof Housing) {
-            return "LOGEMENT";
-        } else if (consumption instanceof Transport) {
-            return "TRANSPORT";
-        }
-        throw new IllegalArgumentException("Unknown consumption type");
-    }
 }
