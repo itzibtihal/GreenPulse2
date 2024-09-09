@@ -1,7 +1,10 @@
 package repositories;
 
 import db.DbConnection;
-import entities.User;
+import entities.*;
+import entities.enums.EnergyType;
+import entities.enums.FoodType;
+import entities.enums.VehicleType;
 import exceptions.DatabaseConnectionException;
 import exceptions.UserNotFoundException;
 
@@ -9,10 +12,12 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class UserRepository {
 
