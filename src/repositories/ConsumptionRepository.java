@@ -7,10 +7,12 @@ import entities.enums.FoodType;
 import entities.enums.VehicleType;
 
 import exceptions.ConsumptionNotFoundException;
+import exceptions.DatabaseConnectionException;
 import exceptions.InvalidConsumptionException;
 
 import java.sql.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -138,7 +140,52 @@ public class ConsumptionRepository {
         }
     }
 
+// List all users with their consumptions grouped by type
+public Map<User, Map<ConsumptionType, List<Consumption>>> findAllUsersWithConsumptions() {
+    String userQuery = "SELECT * FROM users";
+    String consumptionQuery = "SELECT * FROM consumption WHERE user_id = ?";
+    Map<User, Map<ConsumptionType, List<Consumption>>> result = new HashMap<>();
 
+    try (Statement userStatement = connection.createStatement();
+         ResultSet userResultSet = userStatement.executeQuery(userQuery)) {
+
+        while (userResultSet.next()) {
+            UUID userId = (UUID) userResultSet.getObject("id");
+            String name = userResultSet.getString("name");
+            int age = userResultSet.getInt("age");
+            LocalDateTime dateCreated = userResultSet.getTimestamp("date_created").toLocalDateTime();
+
+            User user = new User(userId, name, age, dateCreated);
+            Map<ConsumptionType, List<Consumption>> consumptionsByType = new HashMap<>();
+
+            try (PreparedStatement consumptionStatement = connection.prepareStatement(consumptionQuery)) {
+                consumptionStatement.setObject(1, userId);
+                ResultSet consumptionResultSet = consumptionStatement.executeQuery();
+
+                while (consumptionResultSet.next()) {
+                    UUID consumptionId = (UUID) consumptionResultSet.getObject("id");
+                    ConsumptionType type = ConsumptionType.valueOf(consumptionResultSet.getString("type"));
+                    LocalDate startDate = consumptionResultSet.getDate("start_date").toLocalDate();
+                    LocalDate endDate = consumptionResultSet.getDate("end_date").toLocalDate();
+                    double amount = consumptionResultSet.getDouble("amount");
+                    double impact = consumptionResultSet.getDouble("impact");
+
+                    Consumption consumption = createConsumption(type, consumptionId, userId, startDate, endDate, amount, impact);
+
+                    consumptionsByType
+                            .computeIfAbsent(type, k -> new ArrayList<>())
+                            .add(consumption);
+                }
+            }
+
+            result.put(user, consumptionsByType);
+        }
+    } catch (SQLException e) {
+        throw new DatabaseConnectionException("Error fetching users with consumptions from the database.", e);
+    }
+
+    return result;
+}
     private Transport findTransportById(UUID id, UUID userId, LocalDate startDate, LocalDate endDate, double amount, double impact) throws SQLException {
         String query = "SELECT * FROM transport t " +
                 "JOIN consumption c ON t.consumption_id = c.id " +
