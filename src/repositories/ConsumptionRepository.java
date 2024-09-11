@@ -222,13 +222,64 @@ public class ConsumptionRepository {
 
     // Delete consumption by ID
     public void delete(UUID id) throws SQLException {
-        String query = "DELETE FROM consumption WHERE id = ?";
+        String deleteConsumptionQuery = "DELETE FROM consumption WHERE id = ?";
+        String deleteTransportQuery = "DELETE FROM transport WHERE consumption_id = ?";
+        String deleteHousingQuery = "DELETE FROM housing WHERE consumption_id = ?";
+        String deleteFoodQuery = "DELETE FROM food WHERE consumption_id = ?";
 
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setObject(1, id);
-            statement.executeUpdate();
+        try {
+            connection.setAutoCommit(false);
+            Consumption consumption = findById(id)
+                    .orElseThrow(() -> new ConsumptionNotFoundException("Consumption not found for ID: " + id));
+            ConsumptionType type = consumption.getType();
+
+            // Delete f consumption
+            try (PreparedStatement statement = connection.prepareStatement(deleteConsumptionQuery)) {
+                statement.setObject(1, id);
+                statement.executeUpdate();
+            }
+
+            // Delete from the related table type
+            switch (type) {
+                case TRANSPORT:
+                    try (PreparedStatement statement = connection.prepareStatement(deleteTransportQuery)) {
+                        statement.setObject(1, id);
+                        statement.executeUpdate();
+                    }
+                    break;
+                case HOUSING:
+                    try (PreparedStatement statement = connection.prepareStatement(deleteHousingQuery)) {
+                        statement.setObject(1, id);
+                        statement.executeUpdate();
+                    }
+                    break;
+                case FOOD:
+                    try (PreparedStatement statement = connection.prepareStatement(deleteFoodQuery)) {
+                        statement.setObject(1, id);
+                        statement.executeUpdate();
+                    }
+                    break;
+                default:
+                    throw new InvalidConsumptionException("Unknown consumption type: " + type);
+            }
+
+            connection.commit();
+        } catch (SQLException e) {
+            try {
+                connection.rollback();
+            } catch (SQLException rollbackEx) {
+                rollbackEx.printStackTrace();
+            }
+            throw e;
+        } finally {
+            try {
+                connection.setAutoCommit(true);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
+
 
     // Helper class to create a stream from ResultSet
     private static class ResultSetSpliterator implements Spliterator<ResultSet> {

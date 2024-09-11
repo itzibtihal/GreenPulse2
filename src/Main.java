@@ -1,126 +1,87 @@
 import db.DbConnection;
 
 import java.sql.Connection;
-import java.util.List;
-import java.util.Optional;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Scanner;
 import java.util.UUID;
 
 import entities.*;
-import repositories.UserRepository;
-
+import repositories.ConsumptionRepository;
 
 public class Main {
 
     public static void main(String[] args) {
-       // Connection connection = DbConnection.getConnection();
+        Connection connection = DbConnection.getConnection();
         Scanner scanner = new Scanner(System.in);
 
-//        if (connection != null) {
-//            try {
-//                DatabaseMetaData metaData = connection.getMetaData();
-//                System.out.println("Connected to: " + metaData.getDatabaseProductName() + " " + metaData.getDatabaseProductVersion());
-//                System.out.println("Driver: " + metaData.getDriverName() + " " + metaData.getDriverVersion());
-//
-//                if (connection.isValid(2)) {
-//                    System.out.println("The connection is valid .");
-//                } else {
-//                    System.out.println("The connection is not valid.");
-//                }
-//            } catch (SQLException e) {
-//                System.out.println("Error retrieving database metadata.");
-//                e.printStackTrace();
-//            } finally {
-//                try {
-//                    connection.close();
-//                    System.out.println("Connection closed.");
-//                } catch (SQLException e) {
-//                    System.out.println("Failed to close the connection.");
-//                    e.printStackTrace();
-//                }
-//            }
-//        } else {
-//            System.out.println("Failed to establish a connection.");
-//        }
-//        UserService userService = new UserService();
-//
-//        // Test the findUserById method
-//        System.out.println("\nTesting findUserById:");
-//        try {
-//            UUID testId = UUID.fromString("2e217d1c-a189-494e-9833-6140edadb03a"); // Adjust this UUID
-//            User user = userService.findUserById(testId);
-//            System.out.println("User found: " + user);
-//        } catch (Exception e) {
-//            System.err.println("Error: " + e.getMessage());
-//        }
-//
-//        // Test the findAllUsers method
-//        System.out.println("\nTesting findAllUsers:");
-//
-//            List<User> users = userService.findAllUsers();
-//            if (users.isEmpty()) {
-//                System.out.println("No users found.");
-//            } else {
-//                for (User user : users) {
-//                    System.out.println(user);
-//                }
+        try {
+            if (connection != null) {
+                System.out.println("Database connection established.");
 
+                // Create an instance of ConsumptionRepository
+                ConsumptionRepository repo = new ConsumptionRepository(connection);
 
-        UserRepository userRepository = new UserRepository();
+                // Print records before deletion
+                System.out.println("Records before deletion:");
+                try {
+                    printRecords(connection);
+                } catch (SQLException e) {
+                    System.out.println("Error printing records: " + e.getMessage());
+                }
 
-        // Example: Find user by ID
-//        UUID testId = UUID.fromString("2e217d1c-a189-494f-9833-6140edadb03a");
-//        Optional<User> optionalUser = userRepository.findUserById(testId);
-//
-//        // Handling the optional result
-//        optionalUser.ifPresent(user -> System.out.println("User found: " + user));
-//        if (optionalUser.isEmpty()) {
-//            System.out.println("User with ID " + testId + " not found.");
-//        }
+                // Example consumption ID to delete
+                UUID consumptionIdToDelete = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
 
+                // Perform the delete operation
+                try {
+                    repo.delete(consumptionIdToDelete);
+                    System.out.println("Consumption with ID " + consumptionIdToDelete + " deleted successfully.");
+                } catch (SQLException e) {
+                    System.out.println("Error deleting consumption: " + e.getMessage());
+                }
 
+                // Print records after deletion
+                System.out.println("Records after deletion:");
+                try {
+                    printRecords(connection);
+                } catch (SQLException e) {
+                    System.out.println("Error printing records: " + e.getMessage());
+                }
 
-        //update
-//        System.out.println("Enter the User ID you want to update:");
-//        String idInput = scanner.nextLine();
-//        UUID userId = UUID.fromString(idInput);
-//
-//        // Ask if they want to update the name
-//        System.out.println("Do you want to update the name? (yes/no):");
-//        String updateNameOption = scanner.nextLine();
-//        String newName = null;
-//        if (updateNameOption.equalsIgnoreCase("yes")) {
-//            System.out.println("Enter the new name:");
-//            newName = scanner.nextLine();
-//        }
-//
-//        // Ask if they want to update the age
-//        System.out.println("Do you want to update the age? (yes/no):");
-//        String updateAgeOption = scanner.nextLine();
-//        Integer newAge = null;
-//        if (updateAgeOption.equalsIgnoreCase("yes")) {
-//            System.out.println("Enter the new age:");
-//            newAge = scanner.nextInt(); // assuming valid integer input
-//        }
-//
-//        // Call the update method with the provided values
-//        Optional<User> updatedUser = userRepository.updateUser(userId, newName, newAge);
-//
-//        if (updatedUser.isPresent()) {
-//            System.out.println("User updated successfully: " + updatedUser.get());
-//        } else {
-//            System.out.println("User not found or no changes made.");
-//        }
-
-
-
-
-
-
-
-
+            } else {
+                System.out.println("Failed to establish a connection.");
+            }
+        } finally {
+            // Close the connection
+            if (connection != null) {
+                try {
+                    connection.close();
+                    System.out.println("Connection closed.");
+                } catch (SQLException e) {
+                    System.out.println("Failed to close the connection.");
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
+    private static void printRecords(Connection connection) throws SQLException {
+        String query = "SELECT * FROM consumption";
+        try (PreparedStatement statement = connection.prepareStatement(query);
+             ResultSet resultSet = statement.executeQuery()) {
 
-
+            while (resultSet.next()) {
+                System.out.printf("ID: %s, User ID: %s, Start Date: %s, End Date: %s, Amount: %f, Type: %s, Impact: %f%n",
+                        resultSet.getObject("id"),
+                        resultSet.getObject("user_id"),
+                        resultSet.getDate("start_date"),
+                        resultSet.getDate("end_date"),
+                        resultSet.getDouble("amount"),
+                        resultSet.getString("type"),
+                        resultSet.getDouble("impact"));
+            }
+        }
+    }
 }
