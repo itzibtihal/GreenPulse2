@@ -30,7 +30,7 @@ public class ConsumptionRepository {
     // Save or update consumption
     public void save(Consumption consumption) throws SQLException {
         String query = "INSERT INTO consumption (id, user_id, start_date, end_date, amount, type, impact) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?) " +
+                "VALUES (?, ?, ?, ?, ?, ?::consumption_type, ?) " +  // Cast the type to the consumption_type enum
                 "ON CONFLICT (id) DO UPDATE SET " +
                 "user_id = EXCLUDED.user_id, start_date = EXCLUDED.start_date, end_date = EXCLUDED.end_date, " +
                 "amount = EXCLUDED.amount, type = EXCLUDED.type, impact = EXCLUDED.impact";
@@ -41,7 +41,7 @@ public class ConsumptionRepository {
             statement.setDate(3, Date.valueOf(consumption.getStartDate()));
             statement.setDate(4, Date.valueOf(consumption.getEndDate()));
             statement.setDouble(5, consumption.getAmount());
-            statement.setString(6, consumption.getType().name());
+            statement.setString(6, consumption.getType().name());  // Get the enum name
             statement.setDouble(7, consumption.calculateImpact());
             statement.executeUpdate();
 
@@ -57,23 +57,25 @@ public class ConsumptionRepository {
 
     // Save transport consumption
     private void saveTransport(Transport transport) throws SQLException {
-        String query = "INSERT INTO transport (consumption_id, distanceTraveled, vehicleType) VALUES (?, ?, ?) " +
+        String query = "INSERT INTO transport (consumption_id, distance_traveled, vehicle_type) " +
+                "VALUES (?, ?, ?::vehicle_type) " +
                 "ON CONFLICT (consumption_id) DO UPDATE SET " +
-                "distanceTraveled = EXCLUDED.distanceTraveled, vehicleType = EXCLUDED.vehicleType";
+                "distance_traveled = EXCLUDED.distance_traveled, vehicle_type = EXCLUDED.vehicle_type";
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setObject(1, transport.getId());
             statement.setDouble(2, transport.getDistanceTraveled());
-            statement.setString(3, transport.getVehicleType().name());
+            statement.setString(3, transport.getVehicleType().name()); // Convert enum to string and cast to ENUM type
             statement.executeUpdate();
         }
     }
 
     // Save housing consumption
     private void saveHousing(Housing housing) throws SQLException {
-        String query = "INSERT INTO housing (consumption_id, energyConsumption, energyType) VALUES (?, ?, ?) " +
+        String query = "INSERT INTO housing (consumption_id, energy_consumption, energy_type) " +
+                "VALUES (?, ?, ?::energy_type) " +
                 "ON CONFLICT (consumption_id) DO UPDATE SET " +
-                "energyConsumption = EXCLUDED.energyConsumption, energyType = EXCLUDED.energyType";
+                "energy_consumption = EXCLUDED.energy_consumption, energy_type = EXCLUDED.energy_type";
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setObject(1, housing.getId());
@@ -85,9 +87,10 @@ public class ConsumptionRepository {
 
     // Save food consumption
     private void saveFood(Food food) throws SQLException {
-        String query = "INSERT INTO food (consumption_id, weight, foodType) VALUES (?, ?, ?) " +
+        String query = "INSERT INTO food (consumption_id, weight, food_type) " +
+                "VALUES (?, ?, ?::food_type) " +
                 "ON CONFLICT (consumption_id) DO UPDATE SET " +
-                "weight = EXCLUDED.weight, foodType = EXCLUDED.foodType";
+                "weight = EXCLUDED.weight, food_type = EXCLUDED.food_type";
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setObject(1, food.getId());
@@ -197,25 +200,25 @@ public class ConsumptionRepository {
 
     // List all consumptions
     public List<Consumption> findAll() {
+        List<Consumption> consumptions = new ArrayList<>();
         String query = "SELECT id FROM consumption";
+
         try (PreparedStatement statement = connection.prepareStatement(query);
              ResultSet resultSet = statement.executeQuery()) {
 
-            return StreamSupport.stream(new ResultSetSpliterator(resultSet), false)
-                    .map(row -> {
-                        try {
-                            UUID id = UUID.fromString(row.getString("id"));
-                            return findById(id);
-                        } catch (SQLException e) {
-                            throw new RuntimeException(e);
-                        }
-                    })
-                    .flatMap(Optional::stream) // Convert Optional to Stream if present
-                    .collect(Collectors.toList());
+            while (resultSet.next()) {
+                UUID id = UUID.fromString(resultSet.getString("id"));
+                Optional<Consumption> consumption = findById(id);
+                consumption.ifPresent(consumptions::add);
+            }
+
         } catch (SQLException e) {
             throw new RuntimeException("Database error while listing all consumptions", e);
         }
+
+        return consumptions;
     }
+
 
     // Delete consumption by ID
     public void delete(UUID id) throws SQLException {
@@ -269,3 +272,21 @@ public class ConsumptionRepository {
         }
     }
 }
+//public double calculateAverageConsumption(UUID userId, LocalDate startDate, LocalDate endDate) {
+//    User user = findUserById(userId);
+//    List<Consommation> consommations = user.getConsommations();
+//    List<Consommation> consommationsInPeriod = consommations.stream()
+//            .filter(c -> c.getDate().isAfter(startDate.minusDays(1)) && c.getDate().isBefore(endDate.plusDays(1)))
+//            .collect(Collectors.toList());
+//
+//    if (consommationsInPeriod.isEmpty()) {
+//        throw new InvalidConsumptionException("Aucune consommation trouvée dans la période donnée.");
+//    }
+//
+//    double totalCarbonConsumption = consommationsInPeriod.stream()
+//            .mapToDouble(Consommation::getCarbonImpact)
+//            .sum();
+//
+//    return totalCarbonConsumption / consommationsInPeriod.size();
+//}
+
