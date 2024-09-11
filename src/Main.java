@@ -122,6 +122,15 @@ public class Main {
 //            }
 //        }
 //    }
+        UUID userId = UUID.fromString("5f4f3e2f-3024-4f75-8dc3-035e66b7f826");
+
+
+        List<Consumption> consumptions = consumptionRepository.findConsumptionsByUserId(userId);
+
+        // Print the consumption details
+        for (Consumption consumption : consumptions) {
+            System.out.println(consumption);
+        }
 
     }
 

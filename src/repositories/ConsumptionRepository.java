@@ -141,7 +141,7 @@ public class ConsumptionRepository {
     }
 
 // List all users with their consumptions grouped by type
-public Map<User, Map<ConsumptionType, List<Consumption>>> findAllUsersWithConsumptions() {
+    public Map<User, Map<ConsumptionType, List<Consumption>>> findAllUsersWithConsumptions() {
     String userQuery = "SELECT * FROM users";
     String consumptionQuery = "SELECT * FROM consumption WHERE user_id = ?";
     Map<User, Map<ConsumptionType, List<Consumption>>> result = new HashMap<>();
@@ -261,6 +261,34 @@ public Map<User, Map<ConsumptionType, List<Consumption>>> findAllUsersWithConsum
 
         } catch (SQLException e) {
             throw new RuntimeException("Database error while listing all consumptions", e);
+        }
+
+        return consumptions;
+    }
+
+    // find consumptions of a user
+    public List<Consumption> findConsumptionsByUserId(UUID userId) {
+        String query = "SELECT * FROM consumption WHERE user_id = ?";
+        List<Consumption> consumptions = new ArrayList<>();
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setObject(1, userId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    UUID consumptionId = (UUID) resultSet.getObject("id");
+                    ConsumptionType type = ConsumptionType.valueOf(resultSet.getString("type"));
+                    LocalDate startDate = resultSet.getDate("start_date").toLocalDate();
+                    LocalDate endDate = resultSet.getDate("end_date").toLocalDate();
+                    double amount = resultSet.getDouble("amount");
+                    double impact = resultSet.getDouble("impact");
+
+                    // Recreate the consumption object based on the type
+                    Consumption consumption = createConsumption(type, consumptionId, userId, startDate, endDate, amount, impact);
+                    consumptions.add(consumption);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error fetching consumptions for user ID: " + userId, e);
         }
 
         return consumptions;
