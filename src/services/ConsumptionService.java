@@ -1,28 +1,25 @@
 package services;
 
-import entities.Consumption;
-import entities.ConsumptionType;
-import entities.Food;
-import entities.Housing;
-import entities.Transport;
+import entities.*;
 import exceptions.ConsumptionNotFoundException;
 import exceptions.InvalidConsumptionException;
 import repositories.ConsumptionRepository;
+import repositories.UserRepository;
 import validators.ConsumptionValidator;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 public class ConsumptionService {
 
     private final ConsumptionRepository repository;
+    private final UserRepository userRepository;
 
     public ConsumptionService(Connection connection) {
         this.repository = new ConsumptionRepository(connection);
+        this.userRepository = new UserRepository();
     }
 
     public void saveConsumption(Consumption consumption) throws SQLException {
@@ -64,4 +61,40 @@ public class ConsumptionService {
             repository.save(consumption);
         }
     }
+
+    public List<Consumption> findConsumptionsByUserId(UUID userId) throws SQLException {
+        ConsumptionValidator.validateId(userId);
+        return repository.findConsumptionsByUserId(userId);
+    }
+
+    public Map<User, Map<ConsumptionType, List<Consumption>>> findAllUsersWithConsumptions() throws SQLException {
+        return repository.findAllUsersWithConsumptions();
+    }
+
+
+
+    // filtration
+    public List<User> findUsersExceedingCarbonThreshold(double threshold) throws SQLException {
+        List<User> allUsers = userRepository.findAll(); // Method to retrieve all users
+        List<User> usersExceedingThreshold = new ArrayList<>();
+
+        for (User user : allUsers) {
+            double totalCarbonImpact = calculateTotalCarbonImpactForUser(user.getId());
+            if (totalCarbonImpact > threshold) {
+                usersExceedingThreshold.add(user);
+            }
+        }
+
+        return usersExceedingThreshold;
+    }
+
+    private double calculateTotalCarbonImpactForUser(UUID userId) throws SQLException {
+        List<Consumption> consumptions = repository.findConsumptionsByUserId(userId);
+
+        return consumptions.stream()
+                .mapToDouble(Consumption::calculateImpact)
+                .sum();
+    }
+
+
 }
