@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -11,10 +12,11 @@ import java.util.UUID;
 
 import entities.*;
 import repositories.ConsumptionRepository;
+import services.ConsumptionService;
 
 public class Main {
     Connection connection = DbConnection.getConnection();
-    public static void main(String[] args) {
+    public static void main(String[] args) throws SQLException {
         Connection connection = DbConnection.getConnection();
         Scanner scanner = new Scanner(System.in);
 
@@ -130,6 +132,35 @@ public class Main {
         // Print the consumption details
         for (Consumption consumption : consumptions) {
             System.out.println(consumption);
+        }
+
+        System.out.println("now sort users by carbon");
+        ConsumptionService consumptionService = new ConsumptionService(connection);
+        try {
+            // Call the method to sort users by carbon consumption
+            List<User> sortedUsers = consumptionService.sortUsersByCarbonConsumption();
+
+            // Print sorted users
+            sortedUsers.forEach(System.out::println);
+        } catch (SQLException e) {
+            // Handle SQLException thrown by sortUsersByCarbonConsumption
+            System.err.println("Error sorting users by carbon consumption: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        System.out.println("now average");
+        // Define the period for which you want to calculate average consumption
+        LocalDate startDate = LocalDate.of(2024, 1, 1);  // Example start date
+        LocalDate endDate = LocalDate.of(2024, 12, 31);   // Example end date
+
+        // Call the method to calculate average carbon consumption per user
+        Map<User, Double> averageConsumptionMap = consumptionService.calculateAverageCarbonConsumptionPerUser(startDate, endDate);
+
+        // Print the results
+        for (Map.Entry<User, Double> entry : averageConsumptionMap.entrySet()) {
+            User user = entry.getKey();
+            Double averageConsumption = entry.getValue();
+            System.out.println("User: " + user.getName() + ", Average Carbon Consumption: " + averageConsumption);
         }
 
     }

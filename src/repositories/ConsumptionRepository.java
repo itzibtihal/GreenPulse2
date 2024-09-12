@@ -398,21 +398,5 @@ public class ConsumptionRepository {
         }
     }
 }
-//public double calculateAverageConsumption(UUID userId, LocalDate startDate, LocalDate endDate) {
-//    User user = findUserById(userId);
-//    List<Consommation> consommations = user.getConsommations();
-//    List<Consommation> consommationsInPeriod = consommations.stream()
-//            .filter(c -> c.getDate().isAfter(startDate.minusDays(1)) && c.getDate().isBefore(endDate.plusDays(1)))
-//            .collect(Collectors.toList());
-//
-//    if (consommationsInPeriod.isEmpty()) {
-//        throw new InvalidConsumptionException("Aucune consommation trouvée dans la période donnée.");
-//    }
-//
-//    double totalCarbonConsumption = consommationsInPeriod.stream()
-//            .mapToDouble(Consommation::getCarbonImpact)
-//            .sum();
-//
-//    return totalCarbonConsumption / consommationsInPeriod.size();
-//}
+
 
