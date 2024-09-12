@@ -96,5 +96,27 @@ public class ConsumptionService {
                 .sum();
     }
 
+    public List<User> findInactiveUsers(LocalDate startDate, LocalDate endDate) throws SQLException {
+        List<User> allUsers = userRepository.findAll();
+        List<User> inactiveUsers = new ArrayList<>();
+
+        for (User user : allUsers) {
+            List<Consumption> consumptions = repository.findConsumptionsByUserId(user.getId());
+
+            boolean isActive = consumptions.stream()
+                    .anyMatch(consumption -> isWithinPeriod(consumption, startDate, endDate));
+
+            if (!isActive) {
+                inactiveUsers.add(user);
+            }
+        }
+
+        return inactiveUsers;
+    }
+
+    private boolean isWithinPeriod(Consumption consumption, LocalDate startDate, LocalDate endDate) {
+        return !(consumption.getStartDate().isAfter(endDate) || consumption.getEndDate().isBefore(startDate));
+    }
+
 
 }
