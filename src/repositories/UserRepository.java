@@ -87,7 +87,7 @@ public class UserRepository {
 
             int rowsAffected = statement.executeUpdate();
             if (rowsAffected > 0) {
-                System.out.println("User saved successfully.");
+                System.out.print(" ");
             } else {
                 System.out.println("User was not saved.");
             }
