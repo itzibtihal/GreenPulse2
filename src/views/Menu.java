@@ -5,10 +5,8 @@ import services.ConsumptionService;
 import services.UserService;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.InputMismatchException;
-import java.util.Scanner;
-import java.util.UUID;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 public class Menu {
 
@@ -57,7 +55,7 @@ public class Menu {
 
                         break;
                     case 4:
-
+                        listAllUsers();
                         break;
                     case 5:
 
@@ -101,6 +99,37 @@ public class Menu {
         User newUser = new User(name, age);
         userService.save(newUser);
         System.out.println(ANSI_GREEN + "   User was successfully created!" + ANSI_RESET);
+    }
+
+    public void listAllUsers() {
+        List<User> users = userService.findAll();
+
+        if (users.isEmpty()) {
+            System.out.println("No users found.");
+            return;
+        }
+
+        System.out.println("---     List of Users      ---");
+        int idWidth = 36;
+        int nameWidth = 20;
+        int ageWidth = 3;
+        int createdAtWidth = 12;
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy"); // Formatter for date
+
+        System.out.println(new String(new char[idWidth + nameWidth + ageWidth + createdAtWidth + 9]).replace('\0', '-'));
+        System.out.printf("| %-" + idWidth + "s | %-" + nameWidth + "s | %-" + ageWidth + "s | %-" + createdAtWidth + "s | %n",
+                "User ID", "Name", "Age", "Created At");
+        System.out.println(new String(new char[idWidth + nameWidth + ageWidth + createdAtWidth + 9]).replace('\0', '-'));
+
+        for (User user : users) {
+            System.out.printf("| %-" + idWidth + "s | %-" + nameWidth + "s | %-" + ageWidth + "d | %-" + createdAtWidth + "s | %n",
+                    user.getId(),
+                    user.getName(),
+                    user.getAge(),
+                    user.getDateOfCreation().format(dateFormatter)
+            );
+            System.out.println(new String(new char[idWidth + nameWidth + ageWidth + createdAtWidth + 9]).replace('\0', '-'));
+        }
     }
 
 
