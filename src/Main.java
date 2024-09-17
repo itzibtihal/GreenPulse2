@@ -21,14 +21,13 @@ public class Main {
     public static void main(String[] args) {
         Connection connection = DbConnection.getConnection();
 
-        // Initialize services (UserService, ConsumptionService)
+
         UserService userService = new UserService();
         ConsumptionService consumptionService = new ConsumptionService(connection);
 
-        // Initialize the menu with services
+
         Menu menu = new Menu(userService, consumptionService);
 
-        // Call the displayMainMenu method to test
         menu.displayMainMenu();
     }
 }

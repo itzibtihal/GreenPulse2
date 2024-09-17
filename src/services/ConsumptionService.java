@@ -3,6 +3,7 @@ package services;
 import entities.*;
 import exceptions.ConsumptionNotFoundException;
 import exceptions.InvalidConsumptionException;
+import exceptions.UserNotFoundException;
 import repositories.ConsumptionRepository;
 import repositories.UserRepository;
 import validators.ConsumptionValidator;
@@ -23,7 +24,7 @@ public class ConsumptionService {
         this.userRepository = new UserRepository();
     }
 
-    public void saveConsumption(Consumption consumption) throws SQLException {
+    public void save(Consumption consumption) throws SQLException {
         ConsumptionValidator.validateConsumption(consumption);
         repository.save(consumption);
     }
@@ -89,7 +90,7 @@ public class ConsumptionService {
         return usersExceedingThreshold;
     }
 
-    private double calculateTotalCarbonImpactForUser(UUID userId) throws SQLException {
+    public double calculateTotalCarbonImpactForUser(UUID userId) throws SQLException {
         List<Consumption> consumptions = repository.findConsumptionsByUserId(userId);
 
         return consumptions.stream()
@@ -120,22 +121,31 @@ public class ConsumptionService {
     }
 
     public List<User> sortUsersByCarbonConsumption() throws SQLException {
+        // Retrieve all users from the UserRepository
         List<User> allUsers = userRepository.findAll();
 
-        return allUsers.stream()
+        // Sort the list of users based on their total carbon impact
+        List<User> sortedUsers = allUsers.stream()
                 .sorted((user1, user2) -> {
                     try {
+                        // Calculate total carbon impact for each user
                         double carbonImpact1 = calculateTotalCarbonImpactForUser(user1.getId());
                         double carbonImpact2 = calculateTotalCarbonImpactForUser(user2.getId());
-                        return Double.compare(carbonImpact2, carbonImpact1); // Descending order
+
+                        // Compare carbon impacts in descending order
+                        return Double.compare(carbonImpact2, carbonImpact1);
                     } catch (SQLException e) {
-                        throw new RuntimeException(e);
+                        // Handle SQL exceptions that occur while calculating carbon impact
+                        throw new RuntimeException("Error calculating carbon impact", e);
                     }
                 })
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()); // Collect the sorted results into a list
+
+        return sortedUsers;
     }
 
-//    public double calculateAverageConsumption(UUID userId, LocalDate startDate, LocalDate endDate) {
+
+    //    public double calculateAverageConsumption(UUID userId, LocalDate startDate, LocalDate endDate) {
 //    User user = findUserById(userId);
 //    List<Consommation> consommations = user.getConsommations();
 //    List<Consommation> consommationsInPeriod = consommations.stream()
@@ -176,4 +186,21 @@ public Map<User, Double> calculateAverageCarbonConsumptionPerUser(LocalDate star
 
     return averageConsumptionMap;
 }
+
+// In ConsumptionService.java
+
+    public Map<User, Map<ConsumptionType, List<Consumption>>> getUserDetailsWithConsumptions(UUID userId) throws SQLException {
+        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("User not found for ID: " + userId));
+        List<Consumption> consumptions = repository.findConsumptionsByUserId(userId);
+
+        // Group consumptions by type
+        Map<ConsumptionType, List<Consumption>> consumptionsByType = consumptions.stream()
+                .collect(Collectors.groupingBy(Consumption::getType));
+
+        Map<User, Map<ConsumptionType, List<Consumption>>> result = new HashMap<>();
+        result.put(user, consumptionsByType);
+
+        return result;
+    }
+
 }

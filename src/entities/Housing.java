@@ -9,18 +9,16 @@ public class Housing extends Consumption {
     private double energyConsumption;
     private EnergyType energyType;
 
-    // Constructor with parameters
     public Housing(UUID id, UUID userId, LocalDate startDate, LocalDate endDate, double amount, double energyConsumption, EnergyType energyType) {
         super(id, userId, startDate, endDate, amount, ConsumptionType.HOUSING); // Pass HOUSING type
         this.energyConsumption = energyConsumption;
         this.energyType = energyType;
     }
 
-    // Default constructor
     public Housing() {
     }
 
-    // Getters and setters
+
     public double getEnergyConsumption() {
         return energyConsumption;
     }
@@ -39,7 +37,7 @@ public class Housing extends Consumption {
 
     @Override
     public double calculateImpact() {
-        return energyConsumption * energyType.getCarbonImpact(); // Use the EnergyType impact for calculation
+        return energyConsumption * energyType.getCarbonImpact();
     }
 
     @Override

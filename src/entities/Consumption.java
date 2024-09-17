@@ -6,14 +6,13 @@ import java.util.UUID;
 
 public abstract class Consumption {
     private UUID id;
-    private UUID userId; // foreign key to users table
+    private UUID userId;
     private LocalDate startDate;
     private LocalDate endDate;
     private double amount;
-    private ConsumptionType type; // ENUM in SQL
+    private ConsumptionType type;
     private double impact;
 
-    // Constructor with parameters
     public Consumption(UUID id, UUID userId, LocalDate startDate, LocalDate endDate, double amount, ConsumptionType type) {
         this.id = id;
         this.userId = userId;
@@ -23,12 +22,12 @@ public abstract class Consumption {
         this.type = type;
     }
 
-    // Default constructor
+
     public Consumption() {
-        this.id = UUID.randomUUID(); // Generate a random UUID by default
+        this.id = UUID.randomUUID();
     }
 
-    // Getters and setters
+
     public UUID getId() {
         return id;
     }
@@ -83,15 +82,15 @@ public abstract class Consumption {
         this.type = type;
     }
 
-    // Method to calculate duration in days
+
     public long getDurationInDays() {
         return ChronoUnit.DAYS.between(startDate, endDate);
     }
 
-    // Abstract method that subclasses must implement
+
     public abstract double calculateImpact();
 
-    // toString method
+
     @Override
     public String toString() {
         return "Consumption {" +

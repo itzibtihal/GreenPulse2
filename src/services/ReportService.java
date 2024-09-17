@@ -15,16 +15,16 @@ import java.util.UUID;
 
 public class ReportService {
 
-    private final UserRepository userRepository;
+    private final UserService userService;
     private final ConsumptionService consumptionService;
 
-    public ReportService(UserRepository userRepository, ConsumptionService consumptionService) {
-        this.userRepository = userRepository;
+    public ReportService(UserService userService, ConsumptionService consumptionService) {
+        this.userService = userService;
         this.consumptionService = consumptionService;
     }
 
     public double calculateDailyConsumption(UUID userID, LocalDate reportDate) throws SQLException {
-        User user = userRepository.findById(userID).orElseThrow(() -> new ConsumptionNotFoundException("User not found"));
+        User user = userService.findById(userID).orElseThrow(() -> new ConsumptionNotFoundException("User not found"));
         return user.getConsumption().stream()
                 .filter(consumption -> !consumption.getStartDate().isAfter(reportDate) && !consumption.getEndDate().isBefore(reportDate))
                 .mapToDouble(Consumption::calculateImpact)
@@ -33,7 +33,7 @@ public class ReportService {
 
 
     public double calculateWeeklyConsumption(UUID userID, LocalDate reportDate) throws SQLException {
-        User user = userRepository.findById(userID).orElseThrow(() -> new ConsumptionNotFoundException("User not found"));
+        User user = userService.findById(userID).orElseThrow(() -> new ConsumptionNotFoundException("User not found"));
         LocalDate weekStart = reportDate.with(WeekFields.of(Locale.getDefault()).dayOfWeek(), 1);
         LocalDate weekEnd = weekStart.plusDays(6);
         return user.getConsumption().stream()
@@ -48,7 +48,7 @@ public class ReportService {
 
 
     public double calculateMonthlyConsumption(UUID userID, LocalDate reportDate) throws SQLException {
-        User user = userRepository.findById(userID).orElseThrow(() -> new ConsumptionNotFoundException("User not found"));
+        User user = userService.findById(userID).orElseThrow(() -> new ConsumptionNotFoundException("User not found"));
         YearMonth month = YearMonth.from(reportDate);
         LocalDate monthStart = month.atDay(1);
         LocalDate monthEnd = month.atEndOfMonth();
@@ -75,7 +75,7 @@ public class ReportService {
                 double dailyConsumption = calculateDailyConsumption(userID, reportDate);
                 System.out.printf("Daily carbon consumption report for %s for user %s: %.2f units%n",
                         reportDate,
-                        userRepository.findById(userID).orElseThrow(() -> new ConsumptionNotFoundException("User not found")).getName(),
+                        userService.findById(userID).orElseThrow(() -> new ConsumptionNotFoundException("User not found")).getName(),
                         dailyConsumption);
                 break;
 
@@ -83,7 +83,7 @@ public class ReportService {
                 double weeklyConsumption = calculateWeeklyConsumption(userID, reportDate);
                 System.out.printf("Weekly carbon consumption report for the week starting %s for user %s: %.2f units%n",
                         reportDate,
-                        userRepository.findById(userID).orElseThrow(() -> new ConsumptionNotFoundException("User not found")).getName(),
+                        userService.findById(userID).orElseThrow(() -> new ConsumptionNotFoundException("User not found")).getName(),
                         weeklyConsumption);
                 break;
 
@@ -92,7 +92,7 @@ public class ReportService {
                 System.out.printf("Monthly carbon consumption report for %s %d for user %s: %.2f units%n",
                         reportDate.getMonth(),
                         reportDate.getYear(),
-                        userRepository.findById(userID).orElseThrow(() -> new ConsumptionNotFoundException("User not found")).getName(),
+                        userService.findById(userID).orElseThrow(() -> new ConsumptionNotFoundException("User not found")).getName(),
                         monthlyConsumption);
                 break;
 

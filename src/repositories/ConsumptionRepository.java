@@ -32,7 +32,7 @@ public class ConsumptionRepository {
     // Save or update consumption
     public void save(Consumption consumption) throws SQLException {
         String query = "INSERT INTO consumption (id, user_id, start_date, end_date, amount, type, impact) " +
-                "VALUES (?, ?, ?, ?, ?, ?::consumption_type, ?) " +  // Cast the type to the consumption_type enum
+                "VALUES (?, ?, ?, ?, ?, ?::consumption_type, ?) " +
                 "ON CONFLICT (id) DO UPDATE SET " +
                 "user_id = EXCLUDED.user_id, start_date = EXCLUDED.start_date, end_date = EXCLUDED.end_date, " +
                 "amount = EXCLUDED.amount, type = EXCLUDED.type, impact = EXCLUDED.impact";
@@ -43,7 +43,7 @@ public class ConsumptionRepository {
             statement.setDate(3, Date.valueOf(consumption.getStartDate()));
             statement.setDate(4, Date.valueOf(consumption.getEndDate()));
             statement.setDouble(5, consumption.getAmount());
-            statement.setString(6, consumption.getType().name());  // Get the enum name
+            statement.setString(6, consumption.getType().name());
             statement.setDouble(7, consumption.calculateImpact());
             statement.executeUpdate();
 
