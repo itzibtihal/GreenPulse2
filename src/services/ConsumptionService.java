@@ -77,7 +77,7 @@ public class ConsumptionService {
 
     // filtration
     public List<User> findUsersExceedingCarbonThreshold(double threshold) throws SQLException {
-        List<User> allUsers = userRepository.findAll(); // Method to retrieve all users
+        List<User> allUsers = userRepository.findAll();
         List<User> usersExceedingThreshold = new ArrayList<>();
 
         for (User user : allUsers) {
@@ -86,6 +86,9 @@ public class ConsumptionService {
                 usersExceedingThreshold.add(user);
             }
         }
+//        usersExceedingThreshold = allUsers.stream()
+//                .filter(user -> calculateTotalCarbonImpactForUser(user.getId()) > threshold)
+//                .collect(Collectors.toList());
 
         return usersExceedingThreshold;
     }
@@ -97,6 +100,8 @@ public class ConsumptionService {
                 .mapToDouble(Consumption::calculateImpact)
                 .sum();
     }
+
+
 
     public List<User> findInactiveUsers(LocalDate startDate, LocalDate endDate) throws SQLException {
         List<User> allUsers = userRepository.findAll();
@@ -116,53 +121,37 @@ public class ConsumptionService {
         return inactiveUsers;
     }
 
+
+
     private boolean isWithinPeriod(Consumption consumption, LocalDate startDate, LocalDate endDate) {
         return !(consumption.getStartDate().isAfter(endDate) || consumption.getEndDate().isBefore(startDate));
     }
 
+
+
     public List<User> sortUsersByCarbonConsumption() throws SQLException {
-        // Retrieve all users from the UserRepository
         List<User> allUsers = userRepository.findAll();
 
-        // Sort the list of users based on their total carbon impact
         List<User> sortedUsers = allUsers.stream()
                 .sorted((user1, user2) -> {
                     try {
-                        // Calculate total carbon impact for each user
+
                         double carbonImpact1 = calculateTotalCarbonImpactForUser(user1.getId());
                         double carbonImpact2 = calculateTotalCarbonImpactForUser(user2.getId());
 
-                        // Compare carbon impacts in descending order
                         return Double.compare(carbonImpact2, carbonImpact1);
                     } catch (SQLException e) {
-                        // Handle SQL exceptions that occur while calculating carbon impact
                         throw new RuntimeException("Error calculating carbon impact", e);
                     }
                 })
-                .collect(Collectors.toList()); // Collect the sorted results into a list
+                .collect(Collectors.toList());
 
         return sortedUsers;
     }
 
 
-    //    public double calculateAverageConsumption(UUID userId, LocalDate startDate, LocalDate endDate) {
-//    User user = findUserById(userId);
-//    List<Consommation> consommations = user.getConsommations();
-//    List<Consommation> consommationsInPeriod = consommations.stream()
-//            .filter(c -> c.getDate().isAfter(startDate.minusDays(1)) && c.getDate().isBefore(endDate.plusDays(1)))
-//            .collect(Collectors.toList());
-//
-//    if (consommationsInPeriod.isEmpty()) {
-//        throw new InvalidConsumptionException("Aucune consommation trouvée dans la période donnée.");
-//    }
-//
-//    double totalCarbonConsumption = consommationsInPeriod.stream()
-//            .mapToDouble(Consommation::getCarbonImpact)
-//            .sum();
-//
-//    return totalCarbonConsumption / consommationsInPeriod.size();
-//}
-public Map<User, Double> calculateAverageCarbonConsumptionPerUser(LocalDate startDate, LocalDate endDate) throws SQLException {
+
+  public Map<User, Double> calculateAverageCarbonConsumptionPerUser(LocalDate startDate, LocalDate endDate) throws SQLException {
 
     List<User> allUsers = userRepository.findAll();
     Map<User, Double> averageConsumptionMap = new HashMap<>();
@@ -183,17 +172,14 @@ public Map<User, Double> calculateAverageCarbonConsumptionPerUser(LocalDate star
             averageConsumptionMap.put(user, 0.0);
         }
     }
-
     return averageConsumptionMap;
-}
+  }
 
-// In ConsumptionService.java
 
     public Map<User, Map<ConsumptionType, List<Consumption>>> getUserDetailsWithConsumptions(UUID userId) throws SQLException {
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("User not found for ID: " + userId));
         List<Consumption> consumptions = repository.findConsumptionsByUserId(userId);
 
-        // Group consumptions by type
         Map<ConsumptionType, List<Consumption>> consumptionsByType = consumptions.stream()
                 .collect(Collectors.groupingBy(Consumption::getType));
 
@@ -204,3 +190,22 @@ public Map<User, Double> calculateAverageCarbonConsumptionPerUser(LocalDate star
     }
 
 }
+
+
+//    public double calculateAverageConsumption(UUID userId, LocalDate startDate, LocalDate endDate) {
+//    User user = findUserById(userId);
+//    List<Consommation> consommations = user.getConsommations();
+//    List<Consommation> consommationsInPeriod = consommations.stream()
+//            .filter(c -> c.getDate().isAfter(startDate.minusDays(1)) && c.getDate().isBefore(endDate.plusDays(1)))
+//            .collect(Collectors.toList());
+//
+//    if (consommationsInPeriod.isEmpty()) {
+//        throw new InvalidConsumptionException("Aucune consommation trouvée dans la période donnée.");
+//    }
+//
+//    double totalCarbonConsumption = consommationsInPeriod.stream()
+//            .mapToDouble(Consommation::getCarbonImpact)
+//            .sum();
+//
+//    return totalCarbonConsumption / consommationsInPeriod.size();
+//}

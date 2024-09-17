@@ -6,9 +6,8 @@ import exceptions.InvalidInputException;
 import exceptions.UserNotFoundException;
 import repositories.UserRepository;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class UserService {
 
@@ -56,7 +55,56 @@ public class UserService {
         return userRepository.findMaxCarbonConsumption(userId);
     }
 
+    // exo ;  filter userbyage
 
+    public List<User> listByAge(int ageThreshold) {
+        List<User> users = userRepository.findAll();
+        return users.stream()
+                .filter(user -> user.getAge() > ageThreshold)
+                .collect(Collectors.toList());
+    }
+
+   //get users with a specific name
+
+    public List<User> listByName(String name) {
+        List<User> users = userRepository.findAll();
+        return users.stream()
+                .filter(user -> Objects.equals(user.getName(), name)).collect(Collectors.toList());
+//        return users.stream()
+//                .filter(user -> user.getName().equalsIgnoreCase(name))
+//                .collect(Collectors.toList());
+    }
+
+    //findOldestUser
+
+    public Optional<User> findOldestUser(){
+        List<User> users = userRepository.findAll();
+        return users.stream()
+                .max((user1 , user2)-> Integer.compare(user1.getAge(),user2.getAge()));
+    }
+
+    //calculateAverageAge
+    public OptionalDouble calculateAverageAge(){
+        List<User> users = userRepository.findAll();
+        return users.stream()
+                .mapToInt(User::getAge)
+                .average();
+    }
+
+    public List<User> findTopNOldestUsers(int n) {
+        List<User> users = userRepository.findAll();
+        return users.stream()
+                .sorted((user1, user2) -> Integer.compare(user2.getAge(), user1.getAge()))
+                .limit(n)
+                .collect(Collectors.toList());
+    }
+
+    public List<User> filterAndSortUsersByAge(int minAge) {
+        return userRepository.findAll().stream()
+                .filter(user -> user.getAge() > minAge)
+                .sorted(Comparator.comparingInt(User::getAge).reversed())
+                .collect(Collectors.toList());
+    }
 
     // Validate user ID
     private void validateId(UUID id) {
